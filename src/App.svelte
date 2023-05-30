@@ -17,7 +17,7 @@
   setDeviceInfo();
 </script>
 
-<main class="h-screen w-screen overflow-hidden">
+<main class="h-screen w-screen overflow-hidden lg:flex">
   {#if $selectedFiles.length}
     <Devices />
   {:else}

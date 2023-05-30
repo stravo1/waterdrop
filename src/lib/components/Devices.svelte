@@ -12,7 +12,7 @@
 <div
   in:fade={{ duration: 150 }}
   out:fly={{ y: -250, duration: 200 }}
-  class="relative flex h-screen w-screen flex-col"
+  class="relative flex h-screen w-screen flex-col lg:w-1/2"
 >
   <div
     on:click={deselect}

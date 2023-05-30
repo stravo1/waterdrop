@@ -62,11 +62,14 @@ const commandInterreter = (data: string, deviceID: string) => {
       requiredInfo.sentSize = size;
       if (requiredInfo.sentSize >= requiredInfo.size) {
         showToast("File sent!", "success");
-        $sendingList.delete(id);
+        setTimeout(() => {
+          $sendingList.delete(id);
+          sendingList.set($sendingList);
+        }, 1500);
       } else {
         $sendingList.set(id, requiredInfo);
+        sendingList.set($sendingList);
       }
-      sendingList.set($sendingList);
       break;
     case "sending-complete":
       showToast("File Received!");

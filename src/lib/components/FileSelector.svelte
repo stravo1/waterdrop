@@ -49,18 +49,18 @@
   on:dragover={drag}
   on:click={openSelector}
   on:keypress={openSelector}
-  class="relative flex h-screen w-screen cursor-pointer flex-col items-center justify-center"
+  class="relative flex h-screen w-screen cursor-pointer flex-col items-center justify-center lg:w-1/2"
 >
   <div class="wrapper">
     <div class="select-icon flex justify-center">
       <span class="material-symbols-rounded"> deployed_code </span>
     </div>
-    <div class="text font-medium">click to send files</div>
+    <div class="text font-medium">click <span class="hiddeb lg:visible">or drop</span> to send files</div>
   </div>
   <div
     on:click={scroll}
     on:keypress={scroll}
-    class="down-icon absolute bottom-8 z-50 cursor-pointer"
+    class="down-icon absolute bottom-8 z-50 cursor-pointer lg:hidden"
   >
     <span class="material-symbols-rounded text-[2rem]"> expand_less </span>
   </div>
