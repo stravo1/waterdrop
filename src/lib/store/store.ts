@@ -14,8 +14,6 @@ interface progressInfo {
   fileName: string;
   fileType: string;
   size: number;
-  lastTimeStamp: number;
-  ETA: number;
   id: string;
 }
 interface sendingProgressInfo extends progressInfo {

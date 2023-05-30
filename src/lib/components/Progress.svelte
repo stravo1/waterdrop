@@ -30,7 +30,6 @@
           <FileProgressCard
             fileName={progressInfo.fileName}
             fileType={progressInfo.fileType}
-            ETA={progressInfo.ETA}
             progressSize={progressInfo.sentSize}
             size={progressInfo.size}
             deviceID={progressInfo.to}
@@ -47,7 +46,6 @@
           <FileProgressCard
             fileName={progressInfo[1].fileName}
             fileType={progressInfo[1].fileType}
-            ETA={progressInfo[1].ETA}
             progressSize={progressInfo[1].receivedSize}
             size={progressInfo[1].size}
             deviceID={progressInfo[1].from}

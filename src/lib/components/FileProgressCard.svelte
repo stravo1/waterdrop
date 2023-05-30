@@ -2,21 +2,22 @@
   import { get } from "svelte/store";
   import { connectedDevices, receivingList } from "../store/store";
   import { bytesToSize, showToast } from "../utilities/misc";
+  import { onMount } from "svelte";
 
   export let fileName: string;
   export let fileType: string;
-  export let ETA: number;
   export let size: number;
   export let progressSize: number;
   export let deviceID: string;
   export let link: string = "";
   export let id: string = "";
 
-  const getTime = (arg: number) => {
-    if ((arg = -1)) return "Not started yet";
-    var hours = Math.round(arg / 3600);
-    var minutes = Math.round(arg / 60);
-    var seconds = Math.round(arg % 60);
+  const getTime = (time: number) => {
+    if (time == -1) return "Not started yet";
+    const hours = Math.floor(time / 3600);
+    time = time - hours * 3600;
+    const minutes = Math.floor(time / 60);
+    const seconds = time - minutes * 60;
     var result = "";
     hours ? (result += `${hours} hours `) : (result += "");
     minutes ? (result += `${minutes} minutes `) : (result += "");
@@ -51,21 +52,52 @@
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
-    setTimeout(() => {
-      var $receiveList = get(receivingList);
-      $receiveList.delete(id);
-      receivingList.set($receiveList);
-    }, 1000);
   };
+
+  const remove = (ev: Event) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    var $receiveList = get(receivingList);
+    $receiveList.delete(id);
+    receivingList.set($receiveList);
+  };
+
+  let esimatedEnd = -1;
+  let prevSize = 0;
+  let interval = 1000;
+
+  onMount(() => {
+    setInterval(() => {
+      if (!prevSize) {
+        esimatedEnd = -1;
+      } else {
+        var sizeDifference = progressSize - prevSize;
+        var remainingSize = size - progressSize;
+        var speed = sizeDifference / (interval / 1000);
+        esimatedEnd = Math.round(remainingSize / speed);
+      }
+      prevSize = progressSize;
+    }, interval);
+  });
 </script>
 
 <div
-  class="card my-2 flex w-full rounded-lg bg-zinc-100 p-4 py-5 {link
+  class="card relative my-2 flex w-full rounded-lg bg-zinc-100 p-4 py-5 {link
     ? 'cursor-pointer'
     : ''}"
   on:click={download}
   on:keypress={download}
 >
+  <div
+    on:click={remove}
+    on:keypress={remove}
+    class="icon absolute right-4 top-2 flex items-center justify-center {!link
+      ? 'hidden'
+      : ''}"
+  >
+    <span class="material-symbols-rounded text-zinc-400"> close </span>
+  </div>
   <div class="icon flex h-[50px] items-center justify-center">
     <span class="material-symbols-rounded text-[42px] text-zinc-400">
       {getIcon(fileType)}
@@ -90,7 +122,7 @@
       {#if link}
         File received! Click to download!
       {:else}
-        {getTime(ETA)} left
+        {getTime(esimatedEnd)} left
       {/if}
     </div>
     <div
