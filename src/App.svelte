@@ -10,8 +10,10 @@
   import Devices from "./lib/components/Devices.svelte";
   import LoadingModal from "./lib/components/LoadingModal.svelte";
 
-  let URL = "http://192.168.247.244:8080/";
+  // let URL = "http://192.168.247.244:8080/";
   // let URL = "http://192.168.49.168:8080/";
+  let URL = "https://waterdrop-sqxs.onrender.com";
+
   initializeSocket(URL);
 
   setDeviceInfo();
