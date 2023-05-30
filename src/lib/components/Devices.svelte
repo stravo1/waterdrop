@@ -2,6 +2,7 @@
   import { fade, fly } from "svelte/transition";
   import { selectedFiles, connectedDevices } from "../store/store";
   import DeviceListCard from "./DeviceListCard.svelte";
+  import { sendFiles } from "../utilities/misc";
 
   const deselect = () => {
     selectedFiles.set([]);
@@ -24,15 +25,16 @@
     <div class="progress-wrapper flex min-h-[13rem] w-full flex-col p-8">
       <h1 class="mb-6 text-3xl font-semibold">nearby devices</h1>
       {#if [...$connectedDevices.keys()].length}
-        {#each [...$connectedDevices.values()] as device}
+        {#each [...$connectedDevices.entries()] as device}
           <DeviceListCard
-            deviceType={device.deviceType}
-            name={device.name}
-            platform={device.platform}
+            deviceType={device[1].deviceType}
+            name={device[1].name}
+            platform={device[1].platform}
+            id={device[0]}
           />
         {/each}
       {:else}
-        <div class="flex w-full justify-center mt-4">
+        <div class="mt-4 flex w-full justify-center">
           No nearby devices available :&#40;
         </div>
       {/if}

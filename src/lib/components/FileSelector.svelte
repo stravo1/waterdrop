@@ -2,7 +2,9 @@
   import { selectedFiles } from "../store/store";
   import { showToast } from "../utilities/misc";
 
-  const scroll = () => {
+  const scroll = (ev: Event) => {
+    ev.preventDefault();
+    ev.stopPropagation();
     var main = document.getElementsByTagName("main")[0];
     main.scrollTop = main.scrollHeight;
   };
@@ -58,7 +60,7 @@
   <div
     on:click={scroll}
     on:keypress={scroll}
-    class="down-icon absolute bottom-8 cursor-pointer"
+    class="down-icon absolute bottom-8 z-50 cursor-pointer"
   >
     <span class="material-symbols-rounded text-[2rem]"> expand_less </span>
   </div>

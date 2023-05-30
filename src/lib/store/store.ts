@@ -1,5 +1,5 @@
 import type Peer from "peer-lite";
-import { writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 
 type id = string;
 
@@ -14,6 +14,9 @@ interface progressInfo {
   fileName: string;
   fileType: string;
   size: number;
+  lastTimeStamp: number;
+  ETA: number;
+  id: string;
 }
 interface sendingProgressInfo extends progressInfo {
   to: id;
@@ -22,6 +25,7 @@ interface sendingProgressInfo extends progressInfo {
 interface receivingProgressInfo extends progressInfo {
   from: id;
   receivedSize: number;
+  link?: string,
 }
 
 export const noOfToasts = writable<number>(0);
@@ -31,6 +35,7 @@ export const modalVisible = writable<boolean>(false);
 export const selectedFiles = writable<File[]>([]);
 
 export const connected = writable<boolean>(false);
+export const myID = writable<string>();
 export const deviceInfo = writable<deviceInfo>();
 
 export const otherDevicesInRoom = writable<id[]>([]);
@@ -45,3 +50,46 @@ export const receivingList = writable<Map<id, receivingProgressInfo>>(
 export const receivingFileBufferList = writable<
   Map<id, (ArrayBuffer | ArrayBufferView | Blob)[]>
 >(new Map());
+
+export const currentTransferId = writable<string>();
+
+export const currentlySending = derived(sendingList, ($enrty) => {
+  var newMap: Map<id, sendingProgressInfo> = new Map();
+  $enrty.forEach((sendingInfo, id) => {
+    if (sendingInfo.sentSize > 0) {
+      newMap.set(id, sendingInfo);
+    }
+  });
+  return newMap;
+});
+
+/* redundant code alert weewwww  weeeeeww */
+export const currentlyReceiving = derived(receivingList, ($enrty) => {
+  var newMap: Map<id, receivingProgressInfo> = new Map();
+  $enrty.forEach((receivingInfo, id) => {
+    if (receivingInfo.receivedSize > 0) {
+      newMap.set(id, receivingInfo);
+    }
+  });
+  return newMap;
+});
+
+export const sendingQueue = derived(sendingList, ($enrty) => {
+  var newMap: Map<id, sendingProgressInfo> = new Map();
+  $enrty.forEach((sendingInfo, id) => {
+    if (sendingInfo.sentSize === 0) {
+      newMap.set(id, sendingInfo);
+    }
+  });
+  return newMap;
+});
+
+export const receivingQueue = derived(receivingList, ($enrty) => {
+  var newMap: Map<id, receivingProgressInfo> = new Map();
+  $enrty.forEach((receivingInfo, id) => {
+    if (receivingInfo.receivedSize === 0) {
+      newMap.set(id, receivingInfo);
+    }
+  });
+  return newMap;
+});

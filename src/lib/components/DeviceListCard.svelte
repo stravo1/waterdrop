@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { sendFiles } from "../utilities/misc";
+
   export let deviceType;
   export let name;
   export let platform;
+  export let id;
 
   const getIcon = (arg: string) => {
     switch (arg) {
@@ -15,9 +18,21 @@
         return "devices";
     }
   };
+
+  const send = (deviceID: string) => {
+    sendFiles(deviceID);
+  };
 </script>
 
-<div class="card my-2 flex w-full rounded-lg bg-zinc-100 p-4 py-5">
+<div
+  on:click={() => {
+    send(id);
+  }}
+  on:keypress={() => {
+    send(id);
+  }}
+  class="card my-2 flex w-full rounded-lg bg-zinc-100 p-4 py-5 cursor-pointer"
+>
   <div class="icon flex h-[50px] items-center justify-center">
     <span class="material-symbols-rounded text-[42px] text-zinc-400">
       {getIcon(deviceType)}

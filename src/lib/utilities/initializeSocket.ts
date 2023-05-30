@@ -4,10 +4,12 @@ import {
   connectedPeers,
   modalMessage,
   modalVisible,
+  myID,
   otherDevicesInRoom,
 } from "../store/store";
 import { get } from "svelte/store";
 import { createAnsweringPeer, createOfferingPeer } from "./peerMaker";
+import { showToast } from "./misc";
 
 const JOINING_ROOM = "room-members";
 const NEW_MEMBER_IN_ROOM = "new-room-member";
@@ -100,7 +102,16 @@ const initializeSocket = (URL: string) => {
 
   socket.on("connect", () => {
     connected.set(true);
+    myID.set(socket.id);
     console.log("Connected to server: " + socket.id);
+  });
+
+  socket.on("disconnect", () => {
+    showToast("Disconnected from server", "error")
+  });
+
+  socket.on("reconnect", () => {
+    showToast("Reconnecting to server", "warning")
   });
 
   return socket;
