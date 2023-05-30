@@ -1,5 +1,11 @@
-import { Socket, io } from "socket.io-client";
-import { connectedPeers, otherDevicesInRoom } from "../store/store";
+import { io } from "socket.io-client";
+import {
+  connected,
+  connectedPeers,
+  modalMessage,
+  modalVisible,
+  otherDevicesInRoom,
+} from "../store/store";
 import { get } from "svelte/store";
 import { createAnsweringPeer, createOfferingPeer } from "./peerMaker";
 
@@ -45,15 +51,19 @@ const addICEcandidates = async (
 };
 
 const initializeSocket = (URL: string) => {
+  modalVisible.set(true);
+  modalMessage.set("Connecting to server");
   const socket = io(URL);
 
   socket.on(JOINING_ROOM, (devicesAlreadyInRoom: string[]) => {
+    modalMessage.set("Connecting to nearby devices");
     devicesAlreadyInRoom.forEach((deviceID) => {
       if (deviceID != socket.id) {
         addDeviceToList(deviceID);
         createOfferingPeer(deviceID, socket);
       }
     });
+    modalVisible.set(false);
   });
 
   socket.on(NEW_MEMBER_IN_ROOM, (deviceID: string) => {
@@ -87,6 +97,11 @@ const initializeSocket = (URL: string) => {
       addICEcandidates(from, iceCandidates);
     }
   );
+
+  socket.on("connect", () => {
+    connected.set(true);
+    console.log("Connected to server: " + socket.id);
+  });
 
   return socket;
 };

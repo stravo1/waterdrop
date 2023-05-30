@@ -3,6 +3,7 @@ import type { Socket } from "socket.io-client";
 import { get } from "svelte/store";
 import {
   connectedPeers,
+  deviceInfo,
   initallyConnectedDevices,
   receivingFileBufferList,
   receivingList,
@@ -62,7 +63,7 @@ const handleData = (
     return;
   }
   if (typeof data === "string") {
-    commandInterreter(data);
+    commandInterreter(data, deviceID);
   } else {
     var $fileBuffers = get(receivingFileBufferList);
     var $receivingProgresses = get(receivingList);
@@ -99,6 +100,9 @@ const createOfferingPeer = async (deviceID: string, socket: Socket) => {
 
   peer.on("connected", () => {
     addDeviceToConnectedList(deviceID);
+    setTimeout(() => {
+      peer.send(JSON.stringify({ command: "info", action: get(deviceInfo) }));
+    }, 100);
   });
 
   peer.on("disconnected", () => {
@@ -125,6 +129,9 @@ const createAnsweringPeer = async (deviceID: string, socket: Socket) => {
 
   peer.on("connected", () => {
     addDeviceToConnectedList(deviceID);
+    setTimeout(() => {
+      peer.send(JSON.stringify({ command: "info", action: get(deviceInfo) }));
+    }, 100);
   });
 
   peer.on("disconnected", () => {

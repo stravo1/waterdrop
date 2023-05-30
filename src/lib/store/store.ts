@@ -24,6 +24,15 @@ interface receivingProgressInfo extends progressInfo {
   receivedSize: number;
 }
 
+export const noOfToasts = writable<number>(0);
+export const modalMessage = writable<string>("Loading");
+export const modalVisible = writable<boolean>(false);
+
+export const selectedFiles = writable<File[]>([]);
+
+export const connected = writable<boolean>(false);
+export const deviceInfo = writable<deviceInfo>();
+
 export const otherDevicesInRoom = writable<id[]>([]);
 export const initallyConnectedDevices = writable<id[]>([]);
 export const connectedDevices = writable<Map<id, deviceInfo>>(new Map());
@@ -33,7 +42,6 @@ export const sendingList = writable<Map<id, sendingProgressInfo>>(new Map());
 export const receivingList = writable<Map<id, receivingProgressInfo>>(
   new Map()
 );
-
 export const receivingFileBufferList = writable<
   Map<id, (ArrayBuffer | ArrayBufferView | Blob)[]>
 >(new Map());
