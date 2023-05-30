@@ -6,20 +6,31 @@
   import initializeSocket from "./lib/utilities/initializeSocket";
   import { setDeviceInfo } from "./lib/utilities/misc";
 
-  import { selectedFiles } from "./lib/store/store";
+  import { selectedFiles, settingsVisible } from "./lib/store/store";
   import Devices from "./lib/components/Devices.svelte";
   import LoadingModal from "./lib/components/LoadingModal.svelte";
+  import Setting from "./lib/components/Setting.svelte";
+  import { onMount } from "svelte";
 
-  // let URL = "http://192.168.247.244:8080/";
-  // let URL = "http://192.168.49.168:8080/";
-  let URL = "https://waterdrop-sqxs.onrender.com";
-
-  initializeSocket(URL);
-
-  setDeviceInfo();
+  onMount(() => {
+    let URL = localStorage.getItem("url");
+    if (!URL) URL = "https://waterdrop-sqxs.onrender.com";
+    initializeSocket(URL);
+    setDeviceInfo();
+  });
+  const openSettings = () => {
+    settingsVisible.set(true);
+  };
 </script>
 
-<main class="h-screen w-screen overflow-hidden lg:flex">
+<main class="relative h-screen w-screen overflow-hidden lg:flex">
+  <div
+    on:click={openSettings}
+    on:keypress={openSettings}
+    class="icon absolute right-6 top-8 z-[100] cursor-pointer justify-center opacity-0 transition-all hover:opacity-100"
+  >
+    <span class="material-symbols-rounded text-3xl"> settings </span>
+  </div>
   {#if $selectedFiles.length}
     <Devices />
   {:else}
@@ -29,3 +40,6 @@
 </main>
 <SvelteToast />
 <LoadingModal />
+{#if $settingsVisible}
+  <Setting />
+{/if}

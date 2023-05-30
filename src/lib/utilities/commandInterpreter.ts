@@ -65,7 +65,7 @@ const commandInterreter = (data: string, deviceID: string) => {
         setTimeout(() => {
           $sendingList.delete(id);
           sendingList.set($sendingList);
-        }, 1500);
+        }, 5000);
       } else {
         $sendingList.set(id, requiredInfo);
         sendingList.set($sendingList);

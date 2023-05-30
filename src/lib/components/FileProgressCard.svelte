@@ -3,6 +3,7 @@
   import { connectedDevices, receivingList } from "../store/store";
   import { bytesToSize, showToast } from "../utilities/misc";
   import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
 
   export let fileName: string;
   export let fileType: string;
@@ -83,6 +84,7 @@
 </script>
 
 <div
+  transition:fade={{ duration: 500 }}
   class="card relative my-2 flex w-full rounded-lg bg-zinc-100 p-4 py-5 {link
     ? 'cursor-pointer'
     : ''}"
@@ -121,6 +123,8 @@
     <div class="eta text-xs font-medium">
       {#if link}
         File received! Click to download!
+      {:else if progressSize >= size}
+        File sent!
       {:else}
         {getTime(esimatedEnd)} left
       {/if}

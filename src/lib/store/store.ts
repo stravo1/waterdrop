@@ -29,6 +29,7 @@ interface receivingProgressInfo extends progressInfo {
 export const noOfToasts = writable<number>(0);
 export const modalMessage = writable<string>("Loading");
 export const modalVisible = writable<boolean>(false);
+export const settingsVisible = writable<boolean>(false);
 
 export const selectedFiles = writable<File[]>([]);
 
