@@ -7,7 +7,7 @@ const setDeviceInfo = () => {
   let info = new UAParser(navigator.userAgent);
   let deviceName = info.getBrowser()["name"];
   let platform = info.getOS()["name"];
-  let type = info.getDevice()["type"] ? info.getDevice()["type"] : "Desktop";
+  let type = info.getDevice()["type"] ? info.getDevice()["type"] : "desktop";
 
   let result = {
     name: deviceName,

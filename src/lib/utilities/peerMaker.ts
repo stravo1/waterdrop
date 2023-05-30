@@ -2,6 +2,7 @@ import Peer from "peer-lite";
 import type { Socket } from "socket.io-client";
 import { get } from "svelte/store";
 import {
+  connectedDevices,
   connectedPeers,
   deviceInfo,
   initallyConnectedDevices,
@@ -56,10 +57,15 @@ const addPeerToConnectedList = (deviceID: string, peer: Peer) => {
 };
 
 const removeDeviceFromConnectedList = (deviceID: string) => {
-  var $temp = get(initallyConnectedDevices);
-  $temp.splice($temp.indexOf(deviceID), 1);
-  Peer;
-  initallyConnectedDevices.set($temp);
+  var $initialDevices = get(initallyConnectedDevices);
+  var $connectedPeers = get(connectedPeers);
+  var $connectedDevices = get(connectedDevices);
+  $initialDevices.splice($initialDevices.indexOf(deviceID), 1);
+  $connectedPeers.delete(deviceID);
+  $connectedDevices.delete(deviceID);
+  initallyConnectedDevices.set($initialDevices);
+  connectedPeers.set($connectedPeers);
+  connectedDevices.set($connectedDevices);
 };
 
 const handleData = (
@@ -117,6 +123,10 @@ const createOfferingPeer = async (deviceID: string, socket: Socket) => {
   peer.on("disconnected", () => {
     removeDeviceFromConnectedList(deviceID);
   });
+  peer.on("channelClosed", () => {
+    removeDeviceFromConnectedList(deviceID);
+  });
+
   peer.on("channelData", ({ channel, source, data }) => {
     handleData(peer, deviceID, source, data);
   });
@@ -146,6 +156,10 @@ const createAnsweringPeer = async (deviceID: string, socket: Socket) => {
   peer.on("disconnected", () => {
     removeDeviceFromConnectedList(deviceID);
   });
+  peer.on("channelClosed", () => {
+    removeDeviceFromConnectedList(deviceID);
+  });
+
   peer.on("channelData", ({ channel, source, data }) => {
     handleData(peer, deviceID, source, data);
   });

@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { fade, fly } from "svelte/transition";
-  import { selectedFiles } from "../store/store";
+  import { fade, fly } from "svelte/transition";
+  import { selectedFiles, connectedDevices } from "../store/store";
   import DeviceListCard from "./DeviceListCard.svelte";
 
   const deselect = () => {
@@ -8,7 +8,11 @@
   };
 </script>
 
-<div in:fade="{{duration: 150}}" out:fly="{{x:100, duration: 200}}" class="relative flex h-screen w-screen flex-col">
+<div
+  in:fade={{ duration: 150 }}
+  out:fly={{ y: -250, duration: 200 }}
+  class="relative flex h-screen w-screen flex-col"
+>
   <div
     on:click={deselect}
     on:keypress={deselect}
@@ -19,11 +23,19 @@
   <div class="mt-14 h-[90%] w-full overflow-scroll">
     <div class="progress-wrapper flex min-h-[13rem] w-full flex-col p-8">
       <h1 class="mb-6 text-3xl font-semibold">nearby devices</h1>
-      <DeviceListCard
-        name="Google Chrome"
-        deviceType="mobile"
-        platform="Android"
-      />
+      {#if [...$connectedDevices.keys()].length}
+        {#each [...$connectedDevices.values()] as device}
+          <DeviceListCard
+            deviceType={device.deviceType}
+            name={device.name}
+            platform={device.platform}
+          />
+        {/each}
+      {:else}
+        <div class="flex w-full justify-center mt-4">
+          No nearby devices available :&#40;
+        </div>
+      {/if}
     </div>
     <!-- <div class="progress-wrapper flex min-h-[13rem] w-full p-8">
         <h1 class="text-3xl font-semibold">receiving</h1>
