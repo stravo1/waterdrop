@@ -25,6 +25,15 @@ const sendOffer = (
   socket.emit(SEND_SIGNALLING_OFFER, from, to, data);
 };
 
+const sendAnswer = (
+  socket: Socket,
+  from: string,
+  to: string,
+  data: RTCSessionDescriptionInit
+) => {
+  socket.emit(SEND_SIGNALLING_ANSWER, from, to, data);
+};
+
 const sendICEcandidates = (
   socket: Socket,
   from: string,
@@ -120,7 +129,7 @@ const createAnsweringPeer = async (deviceID: string, socket: Socket) => {
   const peer = new Peer({ enableDataChannels: true, channelLabel: "data" });
 
   peer.on("signal", (data) => {
-    sendOffer(socket, socket.id, deviceID, data);
+    sendAnswer(socket, socket.id, deviceID, data);
   });
 
   peer.on("onicecandidates", (data) => {
