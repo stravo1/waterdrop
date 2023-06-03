@@ -12,9 +12,10 @@
   import Setting from "./lib/components/Setting.svelte";
   import { onMount } from "svelte";
 
-  onMount(() => {
+  onMount(async () => {
     let URL = localStorage.getItem("url");
-    if (!URL) URL = "https://waterdrop-sqxs.onrender.com";
+    if (!URL) URL = "https://waterdrop-server.glitch.me";
+    
     initializeSocket(URL);
     setDeviceInfo();
   });

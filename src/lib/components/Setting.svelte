@@ -2,14 +2,17 @@
   import { onMount } from "svelte";
   import { settingsVisible } from "../store/store";
   import { fade } from "svelte/transition";
+  import { showToast } from "../utilities/misc";
 
   let name;
   let url;
+  let oldUrl;
   // let visibility;
 
   onMount(() => {
     name = localStorage.getItem("name");
     url = localStorage.getItem("url");
+    oldUrl = localStorage.getItem("url");
     // visibility = localStorage.getItem("visibility");
   });
 
@@ -19,16 +22,29 @@
   };
 
   const handleSelectChange = (e) => {
-    if (e.target.value == "public") {
+    if (e.target.value == "render") {
       url = "https://waterdrop-sqxs.onrender.com";
       localStorage.setItem("url", "https://waterdrop-sqxs.onrender.com");
+    } else if (e.target.value == "glitch") {
+      url = "https://waterdrop-server.glitch.me";
+      localStorage.setItem("url", "https://waterdrop-server.glitch.me");
     } else {
-      url = "";
+      if (
+        oldUrl != "https://waterdrop-sqxs.onrender.com" ||
+        oldUrl != "https://waterdrop-server.glitch.me"
+      ) {
+        url = oldUrl;
+        localStorage.setItem("url", oldUrl);
+      } else {
+        url = "";
+      }
     }
+    showToast("Please refresh the page after making any changes!");
   };
 
   const handleURLChange = (e) => {
     url = e.target.value;
+    oldUrl = e.target.value;
     localStorage.setItem("url", e.target.value);
   };
 
@@ -49,7 +65,7 @@
     <span class="material-symbols-rounded text-3xl"> close </span>
   </div>
   <div
-    class="relative flex h-full w-screen min-w-[370px] flex-col bg-white p-8 lg:w-[30vw] lg:border-4 lg:border-dashed"
+    class="relative flex h-full w-screen min-w-[370px] flex-col overflow-scroll bg-white p-8 lg:w-[30vw] lg:border-4 lg:border-dashed"
   >
     <h1 class="mb-10 text-4xl font-semibold">settings</h1>
     <div class="settings-item mb-6 w-full">
@@ -76,9 +92,13 @@
         <a class="underline" href="http://www.render.com" target="_blank"
           >render</a
         >
-        on their free plan. this means it has a monthly usage quota. please use the
-        public server only when it's necessary. to learn how to setup your own local
-        server for waterdrop, <a class="underline" href="">click here</a>.
+        &
+        <a class="underline" href="http://www.glitch.com" target="_blank"
+          >glitch</a
+        >
+        on their free plans with limited monthly quota. please use the public servers
+        only when it's necessary. to learn how to setup your own local server for
+        waterdrop, <a class="underline" href="">click here</a>.
       </div>
       <select
         class="h-14 w-full rounded-lg bg-zinc-100 p-4 text-lg"
@@ -87,15 +107,22 @@
         on:change={handleSelectChange}
       >
         <option
-          value="public"
+          value="render"
           selected={url == "https://waterdrop-sqxs.onrender.com"}
-          >public server</option
+          >public server - render</option
+        >
+        <option
+          value="glitch"
+          selected={url == "https://waterdrop-server.glitch.me"}
+          >public server - glitch</option
         >
         <option value="local" selected={true}>local server</option>
       </select>
       <input
         class="mt-2 h-14 w-full rounded-lg bg-zinc-100 p-4 text-lg {url ==
-        'https://waterdrop-sqxs.onrender.com'
+          'https://waterdrop-sqxs.onrender.com' ||
+        url == 'https://waterdrop-server.glitch.me' ||
+        url == undefined
           ? 'hidden'
           : ''}"
         type="text"
@@ -106,8 +133,6 @@
         on:change={handleURLChange}
       />
     </div>
-    <div class="absolute bottom-0 mb-4 w-[85%] text-center text-sm">
-      settings are auto saved!
-    </div>
+    <div class="mt-8 text-center text-sm">settings are auto saved!</div>
   </div>
 </div>
