@@ -18,6 +18,7 @@ const chunkSize = 16384;
 const SEND_SIGNALLING_OFFER = "transfer-offer";
 const SEND_SIGNALLING_ANSWER = "transfer-answer";
 const SEND_ICE_CANDIDATES = "transfer-ice";
+const SENDING_CHANNEL = "send";
 
 const sendOffer = (
   socket: Socket,
@@ -63,13 +64,15 @@ const removeDeviceFromConnectedList = (deviceID: string) => {
   var $connectedPeers = get(connectedPeers);
   var $connectedDevices = get(connectedDevices);
   var info = $connectedDevices.get(deviceID);
-  try{
-    showToast("Disconnected from " + info.name + " " + info.deviceType, "error");
+  try {
+    showToast(
+      "Disconnected from " + info.name + " " + info.deviceType,
+      "error"
+    );
   } catch {
     console.log("Error");
-    
   }
-    $initialDevices.splice($initialDevices.indexOf(deviceID), 1);
+  $initialDevices.splice($initialDevices.indexOf(deviceID), 1);
   $connectedPeers.delete(deviceID);
   $connectedDevices.delete(deviceID);
   initallyConnectedDevices.set($initialDevices);
@@ -120,14 +123,18 @@ const handleData = (
       JSON.stringify({
         command: "sentSize",
         action: { id: requiredID, size: receivingInfo.receivedSize },
-      })
+      }),
+      SENDING_CHANNEL
     );
     //console.log((receivingInfo.receivedSize / receivingInfo.size) * 100);
   }
 };
 
 const createOfferingPeer = async (deviceID: string, socket: Socket) => {
-  const peer = new Peer({ enableDataChannels: true, channelLabel: "data" });
+  const peer = new Peer({
+    enableDataChannels: true,
+    channelLabel: SENDING_CHANNEL,
+  });
 
   peer.on("signal", (data) => {
     sendOffer(socket, socket.id, deviceID, data);
@@ -139,14 +146,17 @@ const createOfferingPeer = async (deviceID: string, socket: Socket) => {
 
   peer.on("connected", () => {
     addDeviceToConnectedList(deviceID);
-    setTimeout(() => {
-      peer.send(JSON.stringify({ command: "info", action: get(deviceInfo) }));
-    }, 100);
   });
 
-  peer.on("disconnected", () => {
-    removeDeviceFromConnectedList(deviceID);
+  peer.on("channelOpen", ({ channel }) => {
+    if (channel.label == SENDING_CHANNEL) {
+      peer.send(
+        JSON.stringify({ command: "info", action: get(deviceInfo) }),
+        SENDING_CHANNEL
+      );
+    }
   });
+
   peer.on("channelClosed", () => {
     removeDeviceFromConnectedList(deviceID);
   });
@@ -160,7 +170,7 @@ const createOfferingPeer = async (deviceID: string, socket: Socket) => {
 };
 
 const createAnsweringPeer = async (deviceID: string, socket: Socket) => {
-  const peer = new Peer({ enableDataChannels: true, channelLabel: "data" });
+  const peer = new Peer({ enableDataChannels: true });
 
   peer.on("signal", (data) => {
     sendAnswer(socket, socket.id, deviceID, data);
@@ -172,9 +182,15 @@ const createAnsweringPeer = async (deviceID: string, socket: Socket) => {
 
   peer.on("connected", () => {
     addDeviceToConnectedList(deviceID);
-    setTimeout(() => {
-      peer.send(JSON.stringify({ command: "info", action: get(deviceInfo) }));
-    }, 100);
+  });
+
+  peer.on("channelOpen", ({ channel }) => {
+    if (channel.label == SENDING_CHANNEL) {
+      peer.send(
+        JSON.stringify({ command: "info", action: get(deviceInfo) }),
+        SENDING_CHANNEL
+      );
+    }
   });
 
   peer.on("disconnected", () => {

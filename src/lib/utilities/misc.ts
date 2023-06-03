@@ -12,6 +12,7 @@ import { get } from "svelte/store";
 import type Peer from "peer-lite";
 
 const chunkSize = 16384;
+const SENDING_CHANNEL = "send";
 
 function bytesToSize(bytes: number) {
   const sizes = ["bytes", "kb", "mb", "gb", "tb"];
@@ -83,7 +84,8 @@ const sendTransactionReq = (deviceID: string, transactionReq: any) => {
         from: get(myID),
         receivedSize: 0,
       },
-    })
+    }),
+    SENDING_CHANNEL
   );
   return $reqPeer;
 };
@@ -106,15 +108,17 @@ const sendFileData = (peerConnection: Peer, file: File, id: string) => {
     if (typeof e.target.result === "string") return; // to validate the next line
     /* IM A FUCKIN GENIOUS */
     peerConnection.send(
-      JSON.stringify({ command: "next-transfer", action: id })
+      JSON.stringify({ command: "next-transfer", action: id }),
+      SENDING_CHANNEL
     );
-    peerConnection.send(e.target.result);
+    peerConnection.send(e.target.result, SENDING_CHANNEL);
     offset += e.target.result.byteLength;
     if (offset < file.size) {
       readSlice(offset, fileReader, file);
     } else {
       peerConnection.send(
-        JSON.stringify({ command: "sending-complete", action: id })
+        JSON.stringify({ command: "sending-complete", action: id }),
+        SENDING_CHANNEL
       );
     }
   });
