@@ -69,15 +69,15 @@ const removeDeviceFromConnectedList = (deviceID: string) => {
       "Disconnected from " + info.name + " " + info.deviceType,
       "error"
     );
+    $initialDevices.splice($initialDevices.indexOf(deviceID), 1);
+    $connectedPeers.delete(deviceID);
+    $connectedDevices.delete(deviceID);
+    initallyConnectedDevices.set($initialDevices);
+    connectedPeers.set($connectedPeers);
+    connectedDevices.set($connectedDevices);
   } catch {
     console.log("Error");
   }
-  $initialDevices.splice($initialDevices.indexOf(deviceID), 1);
-  $connectedPeers.delete(deviceID);
-  $connectedDevices.delete(deviceID);
-  initallyConnectedDevices.set($initialDevices);
-  connectedPeers.set($connectedPeers);
-  connectedDevices.set($connectedDevices);
 };
 
 const handleData = (
@@ -157,8 +157,10 @@ const createOfferingPeer = async (deviceID: string, socket: Socket) => {
     }
   });
 
-  peer.on("channelClosed", () => {
-    removeDeviceFromConnectedList(deviceID);
+  peer.on("channelClosed", ({ channel }) => {
+    if (channel.label == SENDING_CHANNEL) {
+      removeDeviceFromConnectedList(deviceID);
+    }
   });
 
   peer.on("channelData", ({ channel, source, data }) => {
@@ -193,11 +195,10 @@ const createAnsweringPeer = async (deviceID: string, socket: Socket) => {
     }
   });
 
-  peer.on("disconnected", () => {
-    removeDeviceFromConnectedList(deviceID);
-  });
-  peer.on("channelClosed", () => {
-    removeDeviceFromConnectedList(deviceID);
+  peer.on("channelClosed", ({ channel }) => {
+    if (channel.label == SENDING_CHANNEL) {
+      removeDeviceFromConnectedList(deviceID);
+    }
   });
 
   peer.on("channelData", ({ channel, source, data }) => {
