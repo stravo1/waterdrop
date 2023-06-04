@@ -66,10 +66,10 @@ const commandInterreter = (data: string, deviceID: string) => {
           $sendingList.delete(id);
           sendingList.set($sendingList);
         }, 5000);
-      } else {
-        $sendingList.set(id, requiredInfo);
-        sendingList.set($sendingList);
       }
+      $sendingList.set(id, requiredInfo);
+      sendingList.set($sendingList);
+
       break;
     case "sending-complete":
       showToast("File Received!");

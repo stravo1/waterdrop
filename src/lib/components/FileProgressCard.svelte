@@ -66,7 +66,7 @@
 
   let esimatedEnd = -1;
   let prevSize = 0;
-  let interval = 1000;
+  let interval = 500;
 
   onMount(() => {
     setInterval(() => {
