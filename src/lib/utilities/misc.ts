@@ -3,6 +3,7 @@ import { toast } from "@zerodevx/svelte-toast";
 import {
   connectedPeers,
   deviceInfo,
+  modalMessage,
   myID,
   selectedFiles,
   sendingList,
@@ -14,6 +15,7 @@ import type Peer from "peer-lite";
 const chunkSize = 16384;
 const SENDING_CHANNEL = "send";
 
+/* --- misc useful functions --- */
 function bytesToSize(bytes: number) {
   const sizes = ["bytes", "kb", "mb", "gb", "tb"];
   if (bytes === 0) return "n/a";
@@ -21,6 +23,46 @@ function bytesToSize(bytes: number) {
   if (i === 0) return `${bytes}${sizes[i]}`;
   return `${(bytes / 1024 ** i).toFixed(0)} ${sizes[i]}`;
 }
+
+async function fetchWithTimeout(resource: string) {
+  const timeout = 10000;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  const response = await fetch(resource, {
+    signal: controller.signal,
+  });
+  clearTimeout(id);
+  return response;
+}
+
+/* --- app initializer functions ---*/
+const getWorkingURL = async () => {
+  let URL = localStorage.getItem("url");
+  if (!URL) {
+    // no URL was saved
+    localStorage.setItem("url", "https://waterdrop-server.glitch.me");
+    URL = "https://waterdrop-server.glitch.me";
+    return URL;
+  }
+  modalMessage.set("Connecting to server");
+
+  try {
+    // test if local server is functional
+    await fetchWithTimeout(URL);
+    return URL;
+  } catch (error) {
+    showToast("Local server unavailable!", "warning");
+    modalMessage.set("Trying public servers");
+    try {
+      // probe glitch server
+      await fetch("https://waterdrop-server.glitch.me");
+      return "https://waterdrop-server.glitch.me";
+    } catch (error) {
+      // last option
+      return "https://waterdrop-sqxs.onrender.com";
+    }
+  }
+};
 
 const setDeviceInfo = () => {
   let info = new UAParser(navigator.userAgent);
@@ -39,6 +81,7 @@ const setDeviceInfo = () => {
   return result;
 };
 
+/* --- functions used by components --- */
 const showToast = (message: string, type: string = "misc") => {
   toast.push({
     component: {
@@ -56,6 +99,19 @@ const scroll = () => {
   var main = document.getElementsByTagName("main")[0];
   main.scrollTop = main.scrollHeight;
 };
+
+const sendFiles = (deviceID: string) => {
+  scroll();
+  var $list = get(selectedFiles);
+  selectedFiles.set([]);
+  $list.forEach(async (entry) => {
+    let transactionReq = addTransferToSendingList(deviceID, entry);
+    let peer = sendTransactionReq(deviceID, transactionReq);
+    sendFileData(peer, entry, transactionReq.id);
+  });
+};
+
+/* --- helper functions for the sendFiles function --- */
 
 const addTransferToSendingList = (deviceID: string, entry: File) => {
   let id = get(myID) + Math.round(new Date().getTime() * Math.random());
@@ -125,15 +181,11 @@ const sendFileData = (peerConnection: Peer, file: File, id: string) => {
   readSlice(0, fileReader, file);
 };
 
-const sendFiles = (deviceID: string) => {
-  scroll();
-  var $list = get(selectedFiles);
-  selectedFiles.set([]);
-  $list.forEach(async (entry) => {
-    let transactionReq = addTransferToSendingList(deviceID, entry);
-    let peer = sendTransactionReq(deviceID, transactionReq);
-    sendFileData(peer, entry, transactionReq.id);
-  });
+export {
+  setDeviceInfo,
+  showToast,
+  sendFiles,
+  scroll,
+  bytesToSize,
+  getWorkingURL,
 };
-
-export { setDeviceInfo, showToast, sendFiles, scroll, bytesToSize };

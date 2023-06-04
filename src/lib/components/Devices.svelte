@@ -2,7 +2,6 @@
   import { fade, fly } from "svelte/transition";
   import { selectedFiles, connectedDevices } from "../store/store";
   import DeviceListCard from "./DeviceListCard.svelte";
-  import { sendFiles } from "../utilities/misc";
 
   const deselect = () => {
     selectedFiles.set([]);

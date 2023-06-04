@@ -4,7 +4,7 @@
   import FileSelector from "./lib/components/FileSelector.svelte";
   import Progress from "./lib/components/Progress.svelte";
   import initializeSocket from "./lib/utilities/initializeSocket";
-  import { setDeviceInfo } from "./lib/utilities/misc";
+  import { getWorkingURL, setDeviceInfo } from "./lib/utilities/misc";
 
   import { selectedFiles, settingsVisible } from "./lib/store/store";
   import Devices from "./lib/components/Devices.svelte";
@@ -13,9 +13,7 @@
   import { onMount } from "svelte";
 
   onMount(async () => {
-    let URL = localStorage.getItem("url");
-    if (!URL) URL = "https://waterdrop-server.glitch.me";
-    
+    let URL = await getWorkingURL();
     initializeSocket(URL);
     setDeviceInfo();
   });

@@ -54,7 +54,6 @@ const addICEcandidates = async (
 
 const initializeSocket = (URL: string) => {
   modalVisible.set(true);
-  modalMessage.set("Connecting to server");
   const socket = io(URL);
 
   socket.on(JOINING_ROOM, (devicesAlreadyInRoom: string[]) => {
@@ -107,11 +106,11 @@ const initializeSocket = (URL: string) => {
   });
 
   socket.on("disconnect", () => {
-    showToast("Disconnected from server", "error")
+    showToast("Disconnected from server", "error");
   });
 
   socket.on("reconnect", () => {
-    showToast("Reconnecting to server", "warning")
+    showToast("Reconnecting to server", "warning");
   });
 
   return socket;

@@ -30,7 +30,7 @@
       localStorage.setItem("url", "https://waterdrop-server.glitch.me");
     } else {
       if (
-        oldUrl != "https://waterdrop-sqxs.onrender.com" ||
+        oldUrl != "https://waterdrop-sqxs.onrender.com" &&
         oldUrl != "https://waterdrop-server.glitch.me"
       ) {
         url = oldUrl;
@@ -121,8 +121,7 @@
       <input
         class="mt-2 h-14 w-full rounded-lg bg-zinc-100 p-4 text-lg {url ==
           'https://waterdrop-sqxs.onrender.com' ||
-        url == 'https://waterdrop-server.glitch.me' ||
-        url == undefined
+        url == 'https://waterdrop-server.glitch.me'
           ? 'hidden'
           : ''}"
         type="text"
