@@ -54,8 +54,7 @@
 </script>
 
 <div
-  transition:fade={{ duration: 75 }}
-  class="flex h-screen w-screen flex-col bg-white"
+  class="flex h-screen w-screen flex-col bg-white justify-center items-center"
 >
   <div
     on:click={closeSettings}
@@ -64,7 +63,7 @@
   >
     <span class="material-symbols-rounded text-3xl"> arrow_back </span>
   </div>
-  <div class="relative mx-8 flex h-screen max-w-[900px] flex-col">
+  <div class="relative mx-8 flex h-screen max-w-[370px] flex-col">
     <h1 class="mb-8 text-3xl font-medium">Settings</h1>
     <hr>
     <div class="settings-item my-6 w-full">

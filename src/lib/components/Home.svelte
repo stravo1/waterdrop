@@ -61,7 +61,6 @@
 <div
   on:drop={drop}
   on:dragover={drag}
-  transition:fade={{ duration: 75 }}
   class="flex w-screen flex-col items-center justify-center"
 >
   <div
