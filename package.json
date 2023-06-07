@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "animejs": "^3.2.1",
+    "clipboard": "^2.0.11",
     "hammerjs": "^2.0.8",
     "peer-lite": "^2.0.2",
     "socket.io-client": "^4.6.1",

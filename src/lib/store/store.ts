@@ -1,6 +1,7 @@
 import type Peer from "peer-lite";
 import { derived, writable } from "svelte/store";
 
+/* TODO: put interfaces in separate files and use them in other places */
 type id = string;
 
 interface deviceInfo {
@@ -23,15 +24,30 @@ interface sendingProgressInfo extends progressInfo {
 interface receivingProgressInfo extends progressInfo {
   from: id;
   receivedSize: number;
-  link?: string,
+  link?: string;
+}
+
+interface receivedTextModalContent {
+  name: string;
+  text: string;
 }
 
 export const noOfToasts = writable<number>(0);
 export const modalMessage = writable<string>("Loading");
 export const modalVisible = writable<boolean>(true);
-export const settingsVisible = writable<boolean>(false);
+export const sheetVisible = writable<boolean>(false);
+export const receivedTextModalVisible = writable<boolean>(false);
+export const receivedTextModalContent = writable<receivedTextModalContent>({
+  name: "",
+  text: "",
+});
+
+export const settingsPageOpen = writable<boolean>(false);
+export const historyPageOpen = writable<boolean>(false);
+export const historyPageSection = writable<"sent" | "received">("sent");
 
 export const selectedFiles = writable<File[]>([]);
+export const textInput = writable<string>();
 
 export const connected = writable<boolean>(false);
 export const myID = writable<string>();
@@ -87,6 +103,26 @@ export const receivingQueue = derived(receivingList, ($enrty) => {
   var newMap: Map<id, receivingProgressInfo> = new Map();
   $enrty.forEach((receivingInfo, id) => {
     if (receivingInfo.receivedSize === 0) {
+      newMap.set(id, receivingInfo);
+    }
+  });
+  return newMap;
+});
+
+export const sentList = derived(sendingList, ($enrty) => {
+  var newMap: Map<id, sendingProgressInfo> = new Map();
+  $enrty.forEach((sendingInfo, id) => {
+    if (sendingInfo.sentSize >= sendingInfo.size) {
+      newMap.set(id, sendingInfo);
+    }
+  });
+  return newMap;
+});
+
+export const receivedList = derived(receivingList, ($enrty) => {
+  var newMap: Map<id, receivingProgressInfo> = new Map();
+  $enrty.forEach((receivingInfo, id) => {
+    if (receivingInfo.receivedSize >= receivingInfo.size) {
       newMap.set(id, receivingInfo);
     }
   });

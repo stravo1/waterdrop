@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { settingsVisible } from "../store/store";
+  import { settingsPageOpen } from "../store/store";
   import { fade } from "svelte/transition";
   import { showToast } from "../utilities/misc";
 
@@ -49,34 +49,34 @@
   };
 
   const closeSettings = () => {
-    settingsVisible.set(false);
+    settingsPageOpen.set(false);
   };
 </script>
 
 <div
-  transition:fade={{ duration: 250 }}
-  class="absolute top-0 z-[100] flex h-screen w-screen items-center justify-center bg-white"
+  transition:fade={{ duration: 75 }}
+  class="flex h-screen w-screen flex-col bg-white"
 >
   <div
     on:click={closeSettings}
     on:keypress={closeSettings}
-    class="icon absolute right-6 top-8 z-[100] flex cursor-pointer justify-center"
+    class="icon mb-6 flex w-full justify-start pl-3 pt-4 lg:cursor-pointer lg:pr-8 lg:pt-6"
   >
-    <span class="material-symbols-rounded text-3xl"> close </span>
+    <span class="material-symbols-rounded text-3xl"> arrow_back </span>
   </div>
-  <div
-    class="relative flex h-full w-screen min-w-[370px] flex-col overflow-scroll bg-white p-8 lg:w-[30vw] lg:border-4 lg:border-dashed"
-  >
-    <h1 class="mb-10 text-4xl font-semibold">settings</h1>
-    <div class="settings-item mb-6 w-full">
-      <label for="name" class="mb-2 block text-2xl font-medium">name:</label>
-      <div class="mb-4 text-sm">
-        please make sure this name is same in all your devices. this name is
-        used to differentiate between your devices and the devices of others' in
-        the same network.
+  <div class="relative mx-8 flex h-screen max-w-[900px] flex-col">
+    <h1 class="mb-8 text-3xl font-medium">Settings</h1>
+    <hr>
+    <div class="settings-item my-6 w-full">
+      <label for="name" class="mb-1 block text-lg font-medium"
+        >Device name:</label
+      >
+      <div class="mb-4 text-xs text-gray-500">
+        Provide a specific name for this device such as 'iPhone 12 mini',
+        'Lenovo ThinkPad' or 'moto g52'.
       </div>
       <input
-        class="h-12 w-full rounded-lg bg-zinc-100 p-4 text-lg"
+        class="h-10 w-full rounded-lg bg-zinc-100 p-4 text-sm"
         type="text"
         name="name"
         id="name"
@@ -85,9 +85,10 @@
         on:change={handleNameChange}
       />
     </div>
-    <div class="settings-item mb-4 w-full">
-      <label for="name" class="mb-2 block text-2xl font-medium">server:</label>
-      <div class="mb-4 text-sm">
+    <hr>
+    <div class="settings-item my-4 w-full">
+      <label for="name" class="mb-2 block text-lg font-medium">Server:</label>
+      <div class="mb-4 text-xs text-gray-500">
         currently the public server for waterdrop is hosted on
         <a class="underline" href="http://www.render.com" target="_blank"
           >render</a
@@ -101,7 +102,7 @@
         waterdrop, <a class="underline" href="">click here</a>.
       </div>
       <select
-        class="h-14 w-full rounded-lg bg-zinc-100 p-4 text-lg"
+        class="h-10 w-full rounded-lg bg-zinc-100 px-4 text-sm"
         name="name"
         id="name"
         on:change={handleSelectChange}
@@ -119,7 +120,7 @@
         <option value="local" selected={true}>local server</option>
       </select>
       <input
-        class="mt-2 h-14 w-full rounded-lg bg-zinc-100 p-4 text-lg {url ==
+        class="mt-2 h-10 w-full rounded-lg bg-zinc-100 p-4 text-sm {url ==
           'https://waterdrop-sqxs.onrender.com' ||
         url == 'https://waterdrop-server.glitch.me'
           ? 'hidden'
@@ -132,6 +133,7 @@
         on:change={handleURLChange}
       />
     </div>
-    <div class="mt-8 text-center text-sm">settings are auto saved!</div>
+    <hr>
+    <div class="mt-8 text-center text-xs text-gray-500">settings are auto saved!</div>
   </div>
 </div>

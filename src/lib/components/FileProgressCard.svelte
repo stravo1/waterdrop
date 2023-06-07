@@ -1,9 +1,8 @@
 <script lang="ts">
   import { get } from "svelte/store";
-  import { connectedDevices, receivingList } from "../store/store";
-  import { bytesToSize, showToast } from "../utilities/misc";
-  import { onMount } from "svelte";
-  import { fade } from "svelte/transition";
+  import { connectedDevices } from "../store/store";
+  import { bytesToSize } from "../utilities/misc";
+  import { onDestroy, onMount } from "svelte";
 
   export let fileName: string;
   export let fileType: string;
@@ -40,7 +39,7 @@
   const getDeviceInfo = (deviceID: string) => {
     let $deviceList = get(connectedDevices);
     let info = $deviceList.get(deviceID);
-    return `${info.name} - ${info.platform} ${info.deviceType}`;
+    return info.name;
   };
 
   const download = () => {
@@ -55,21 +54,13 @@
     a.click();
   };
 
-  const remove = (ev: Event) => {
-    ev.preventDefault();
-    ev.stopPropagation();
-
-    var $receiveList = get(receivingList);
-    $receiveList.delete(id);
-    receivingList.set($receiveList);
-  };
-
   let esimatedEnd = -1;
   let prevSize = 0;
   let interval = 500;
+  let timer;
 
   onMount(() => {
-    setInterval(() => {
+    timer = setInterval(() => {
       if (!prevSize) {
         esimatedEnd = -1;
       } else {
@@ -81,66 +72,49 @@
       prevSize = progressSize;
     }, interval);
   });
+
+  onDestroy(() => {
+    clearInterval(timer);
+  });
 </script>
 
 <div
-  transition:fade={{ duration: 500 }}
-  class="card relative my-2 flex w-full rounded-lg bg-zinc-100 p-4 py-5 {link
-    ? 'cursor-pointer'
-    : ''}"
+  class="card relative my-2 flex w-full py-5 {link ? 'cursor-pointer' : ''}"
   on:click={download}
   on:keypress={download}
 >
   <div
-    on:click={remove}
-    on:keypress={remove}
-    class="icon absolute right-4 top-2 flex items-center justify-center {!link
-      ? 'hidden'
-      : ''}"
+    class="icon flex h-12 shrink-0 grow-0 basis-12 items-center justify-center rounded-full border-2 border-solid"
   >
-    <span class="material-symbols-rounded text-zinc-400"> close </span>
-  </div>
-  <div class="icon flex h-[50px] items-center justify-center">
-    <span class="material-symbols-rounded text-[42px] text-zinc-400">
+    <span class="material-symbols-rounded text-3xl text-zinc-600">
       {getIcon(fileType)}
     </span>
   </div>
-  <div class="info mx-4 flex flex-col gap-2">
+  <div class="info mx-4 box-border flex w-4/5 flex-col gap-1">
     <div
-      class="file-name w-full overflow-hidden text-ellipsis whitespace-nowrap text-lg font-medium"
+      class="file-name w-full overflow-hidden text-ellipsis whitespace-nowrap text-lg"
     >
       {fileName}
     </div>
-    <div class="progress-bar relative h-3 w-full">
-      <div
-        class="outer-bar absolute left-0 top-0 h-3 w-full rounded-full bg-zinc-300"
-      />
-      <div
-        class="inner-bar absolute left-0 top-0 h-3 rounded-full bg-rose-300"
-        style="width: {Math.round((progressSize / size) * 100)}%;"
-      />
-    </div>
-    <div class="eta text-xs font-medium">
-      {#if link}
-        File received! Click to download!
-      {:else if progressSize >= size}
-        File sent!
-      {:else}
-        {getTime(esimatedEnd)} left
-      {/if}
-    </div>
+
     <div
-      class="device w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs font-medium"
+      class="eta w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs font-medium"
     >
-      {bytesToSize(progressSize)} / {bytesToSize(size)} - {getDeviceInfo(
-        deviceID
-      )}
+      {#if link}
+        Click to download! - Received from {getDeviceInfo(deviceID)}
+      {:else if progressSize >= size}
+        Sent to {getDeviceInfo(deviceID)}
+      {:else}
+        {getTime(esimatedEnd)} left - {bytesToSize(progressSize)} / {bytesToSize(
+          size
+        )}
+      {/if}
     </div>
   </div>
 </div>
 
 <style>
-  .info {
-    width: calc(100vw - 10.5rem);
+  .material-symbols-rounded {
+    font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0, "opsz" 48;
   }
 </style>

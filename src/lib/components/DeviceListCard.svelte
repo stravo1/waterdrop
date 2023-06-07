@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { sendFiles } from "../utilities/misc";
+  import { get } from "svelte/store";
+  import { sendFiles, sendText } from "../utilities/misc";
+  import { textInput } from "../store/store";
 
   export let deviceType;
   export let name;
-  export let platform;
   export let id;
 
   const getIcon = (arg: string) => {
@@ -20,7 +21,11 @@
   };
 
   const send = (deviceID: string) => {
-    sendFiles(deviceID);
+    if (get(textInput)) {
+      sendText(deviceID);
+    } else {
+      sendFiles(deviceID);
+    }
   };
 </script>
 
@@ -31,19 +36,20 @@
   on:keypress={() => {
     send(id);
   }}
-  class="card my-2 flex w-full rounded-lg bg-zinc-100 p-4 py-5 cursor-pointer"
+  class="card my-2 flex w-1/4 cursor-pointer flex-col items-center justify-center rounded-lg bg-zinc-100 p-4 py-5"
 >
-  <div class="icon flex h-[50px] items-center justify-center">
-    <span class="material-symbols-rounded text-[42px] text-zinc-400">
+  <div
+    class="icon flex h-12 w-12 items-center justify-center rounded-full border-4 border-solid"
+  >
+    <span class="material-symbols-rounded text-zinc-400">
       {getIcon(deviceType)}
     </span>
   </div>
-  <div class="info mx-4 flex flex-col gap-1">
-    <div class="file-name text-lg font-medium capitalize">
+  <div class="info mt-2">
+    <div
+      class="file-name w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs font-medium capitalize"
+    >
       {name}
-    </div>
-    <div class="type text-xs font-medium capitalize">
-      {platform} - {deviceType}
     </div>
   </div>
 </div>

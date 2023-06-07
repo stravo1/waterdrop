@@ -3,10 +3,14 @@ import { toast } from "@zerodevx/svelte-toast";
 import {
   connectedPeers,
   deviceInfo,
+  historyPageOpen,
+  historyPageSection,
   modalMessage,
   myID,
   selectedFiles,
   sendingList,
+  sheetVisible,
+  textInput,
 } from "../store/store";
 import Notification from "../components/Notification.svelte";
 import { get } from "svelte/store";
@@ -95,13 +99,10 @@ const showToast = (message: string, type: string = "misc") => {
   });
 };
 
-const scroll = () => {
-  var main = document.getElementsByTagName("main")[0];
-  main.scrollTop = main.scrollHeight;
-};
 
 const sendFiles = (deviceID: string) => {
-  scroll();
+  historyPageOpen.set(true);
+  historyPageSection.set("sent");
   var $list = get(selectedFiles);
   selectedFiles.set([]);
   $list.forEach(async (entry) => {
@@ -181,11 +182,22 @@ const sendFileData = (peerConnection: Peer, file: File, id: string) => {
   readSlice(0, fileReader, file);
 };
 
+const sendText = (deviceID: string) => {
+  let peer = get(connectedPeers).get(deviceID);
+  peer.send(
+    JSON.stringify({ command: "text-transfer", action: get(textInput) }),
+    SENDING_CHANNEL
+  );
+  showToast("Text sent!", "success");
+  textInput.set("");
+  sheetVisible.set(false);
+};
+
 export {
   setDeviceInfo,
   showToast,
   sendFiles,
-  scroll,
+  sendText,
   bytesToSize,
   getWorkingURL,
 };

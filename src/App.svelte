@@ -1,44 +1,36 @@
 <script lang="ts">
   import { SvelteToast } from "@zerodevx/svelte-toast";
 
-  import FileSelector from "./lib/components/FileSelector.svelte";
-  import Progress from "./lib/components/Progress.svelte";
   import initializeSocket from "./lib/utilities/initializeSocket";
   import { getWorkingURL, setDeviceInfo } from "./lib/utilities/misc";
 
-  import { selectedFiles, settingsVisible } from "./lib/store/store";
-  import Devices from "./lib/components/Devices.svelte";
+  import {
+    settingsPageOpen,
+    historyPageOpen,
+  } from "./lib/store/store";
   import LoadingModal from "./lib/components/LoadingModal.svelte";
   import Setting from "./lib/components/Setting.svelte";
   import { onMount } from "svelte";
+  import Home from "./lib/components/Home.svelte";
+  import History from "./lib/components/History.svelte";
+  import ReceivedTextModal from "./lib/components/ReceivedTextModal.svelte";
 
   onMount(async () => {
     let URL = await getWorkingURL();
     initializeSocket(URL);
     setDeviceInfo();
   });
-  const openSettings = () => {
-    settingsVisible.set(true);
-  };
 </script>
 
-<main class="relative h-screen w-screen overflow-hidden lg:flex">
-  <div
-    on:click={openSettings}
-    on:keypress={openSettings}
-    class="icon absolute right-6 top-8 z-[100] cursor-pointer justify-center opacity-0 transition-all hover:opacity-100"
-  >
-    <span class="material-symbols-rounded text-3xl"> settings </span>
-  </div>
-  {#if $selectedFiles.length}
-    <Devices />
+<main class="relative h-screen w-screen overflow-hidden lg:flex text-gray-900">
+  {#if $historyPageOpen}
+    <History />
+  {:else if $settingsPageOpen}
+    <Setting />
   {:else}
-    <FileSelector />
+    <Home />
   {/if}
-  <Progress />
 </main>
 <SvelteToast />
 <LoadingModal />
-{#if $settingsVisible}
-  <Setting />
-{/if}
+<ReceivedTextModal />

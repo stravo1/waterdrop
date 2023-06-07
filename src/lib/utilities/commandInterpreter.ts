@@ -2,13 +2,17 @@ import { get } from "svelte/store";
 import {
   connectedDevices,
   currentTransferId,
+  historyPageOpen,
+  historyPageSection,
   noOfToasts,
+  receivedTextModalContent,
+  receivedTextModalVisible,
   receivingFileBufferList,
   receivingList,
-  selectedFiles,
   sendingList,
+  sheetVisible,
 } from "../store/store";
-import { scroll, showToast } from "./misc";
+import { showToast } from "./misc";
 import { toast } from "@zerodevx/svelte-toast";
 
 const commandInterreter = (data: string, deviceID: string) => {
@@ -37,11 +41,12 @@ const commandInterreter = (data: string, deviceID: string) => {
       }
       break;
     case "receiveReq":
-      if (!get(selectedFiles).length) {
-        scroll();
+      if (!get(sheetVisible)) {
+        historyPageOpen.set(true);
+        historyPageSection.set("received");
       }
       var { id, ...info } = action;
-      console.log(id);
+      //console.log(id);
 
       var $receiveList = get(receivingList);
       $receiveList.set(id, info);
@@ -55,6 +60,12 @@ const commandInterreter = (data: string, deviceID: string) => {
       var transferID = action;
       currentTransferId.set(transferID);
       break;
+    case "text-transfer":
+      var text = action;
+      var reqName = get(connectedDevices).get(deviceID).name;
+      receivedTextModalContent.set({ name: reqName, text: text });
+      receivedTextModalVisible.set(true);
+      break;
     case "sentSize":
       var { id, size } = action;
       let $sendingList = get(sendingList);
@@ -62,10 +73,10 @@ const commandInterreter = (data: string, deviceID: string) => {
       requiredInfo.sentSize = size;
       if (requiredInfo.sentSize >= requiredInfo.size) {
         showToast("File sent!", "success");
-        setTimeout(() => {
-          $sendingList.delete(id);
-          sendingList.set($sendingList);
-        }, 5000);
+        // setTimeout(() => {
+        //   $sendingList.delete(id);
+        //   sendingList.set($sendingList);
+        // }, 5000);
       }
       $sendingList.set(id, requiredInfo);
       sendingList.set($sendingList);
