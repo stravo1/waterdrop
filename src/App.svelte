@@ -2,12 +2,13 @@
   import { SvelteToast } from "@zerodevx/svelte-toast";
 
   import initializeSocket from "./lib/utilities/initializeSocket";
-  import { getWorkingURL, setDeviceInfo } from "./lib/utilities/misc";
-
   import {
-    settingsPageOpen,
-    historyPageOpen,
-  } from "./lib/store/store";
+    checkShare,
+    getWorkingURL,
+    setDeviceInfo,
+  } from "./lib/utilities/misc";
+
+  import { settingsPageOpen, historyPageOpen } from "./lib/store/store";
   import LoadingModal from "./lib/components/LoadingModal.svelte";
   import Setting from "./lib/components/Setting.svelte";
   import { onMount } from "svelte";
@@ -19,10 +20,11 @@
     let URL = await getWorkingURL();
     initializeSocket(URL);
     setDeviceInfo();
+    await checkShare();
   });
 </script>
 
-<main class="relative h-screen w-screen overflow-hidden lg:flex text-gray-900">
+<main class="relative h-screen w-screen overflow-hidden text-gray-900 lg:flex">
   {#if $historyPageOpen}
     <History />
   {:else if $settingsPageOpen}

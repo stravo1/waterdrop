@@ -194,6 +194,37 @@ const sendText = (deviceID: string) => {
   sheetVisible.set(false);
 };
 
+/* --- check for direct shares to the PWA --- */
+const checkShare = async () => {
+  const trigger = await caches.open("trigger");
+
+  let keys = await trigger.keys();
+  if (!keys.length) {
+    return;
+  }
+  caches.open("add").then((cache) => {
+    cache.keys().then((requests) => {
+      requests.forEach(async (request) => {
+        var response = await cache.match(request);
+        if (response.headers.get("content-type") == "text/plain") {
+          response.text().then((txt) => textInput.set(txt));
+          cache.delete(request);
+        } else {
+          let blob = await response.blob();
+          let file = new File([blob], request.url.slice(26), {
+            type: response.headers.get("content-type"),
+          });
+          let $selectedFiles = get(selectedFiles);
+          $selectedFiles.push(file);
+          selectedFiles.set($selectedFiles);
+          cache.delete(request);
+        }
+      });
+    });
+  });
+  sheetVisible.set(true);
+};
+
 export {
   setDeviceInfo,
   showToast,
@@ -201,4 +232,5 @@ export {
   sendText,
   bytesToSize,
   getWorkingURL,
+  checkShare,
 };
