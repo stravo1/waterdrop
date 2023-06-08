@@ -85,9 +85,7 @@ export default defineConfig({
                 );
               }
               for (const text of texts) {
-                const cacheKey = new URL(
-                  `${Math.round(new Date().getTime() * Math.random())}`
-                ).href;
+                const cacheKey = new URL(`${Date.now()}`, self.location).href;
                 const txtBlob = new Blob([text], { type: "text/plain" });
                 await cache.put(
                   cacheKey,
