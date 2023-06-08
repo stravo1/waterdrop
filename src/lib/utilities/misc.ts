@@ -15,9 +15,11 @@ import {
 import Notification from "../components/Notification.svelte";
 import { get } from "svelte/store";
 import type Peer from "peer-lite";
+import Emitter from "component-emitter";
 
 const chunkSize = 16384;
 const SENDING_CHANNEL = "send";
+const emitter = new Emitter();
 
 /* --- misc useful functions --- */
 function bytesToSize(bytes: number) {
@@ -99,7 +101,6 @@ const showToast = (message: string, type: string = "misc") => {
   });
 };
 
-
 const sendFiles = (deviceID: string) => {
   historyPageOpen.set(true);
   historyPageSection.set("sent");
@@ -147,31 +148,31 @@ const sendTransactionReq = (deviceID: string, transactionReq: any) => {
   return $reqPeer;
 };
 
-const readSlice = (offset: number, fileReader: FileReader, file: File) => {
-  const slice = file.slice(offset, offset + chunkSize);
-  fileReader.readAsArrayBuffer(slice);
+const readSlice = (offset: number, buffer: ArrayBuffer, peer: Peer) => {
+  const chunk = buffer.slice(offset, offset + chunkSize);
+  const dataChannel = peer.getDataChannel(SENDING_CHANNEL);
+  if (dataChannel.bufferedAmount > dataChannel.bufferedAmountLowThreshold) {
+    dataChannel.onbufferedamountlow = () => {
+      dataChannel.onbufferedamountlow = null;
+      emitter.emit("load", { chunk: chunk });
+    };
+    return;
+  }
+  emitter.emit("load", { chunk: chunk });
 };
 
-const sendFileData = (peerConnection: Peer, file: File, id: string) => {
+const sendFileData = async (peerConnection: Peer, file: File, id: string) => {
   let offset = 0;
-  var fileReader = new FileReader();
-  fileReader.addEventListener("error", (error) =>
-    console.error("Error reading file:", error)
-  );
-  fileReader.addEventListener("abort", (event) =>
-    console.log("File reading aborted:", event)
-  );
-  fileReader.addEventListener("load", async (e) => {
-    if (typeof e.target.result === "string") return; // to validate the next line
-    /* IM A FUCKIN GENIOUS */
+  var buffer = await file.arrayBuffer();
+  emitter.on("load", (e) => {
     peerConnection.send(
       JSON.stringify({ command: "next-transfer", action: id }),
       SENDING_CHANNEL
     );
-    peerConnection.send(e.target.result, SENDING_CHANNEL);
-    offset += e.target.result.byteLength;
+    peerConnection.send(e.chunk, SENDING_CHANNEL);
+    offset += e.chunk.byteLength;
     if (offset < file.size) {
-      readSlice(offset, fileReader, file);
+      readSlice(offset, buffer, peerConnection);
     } else {
       peerConnection.send(
         JSON.stringify({ command: "sending-complete", action: id }),
@@ -179,7 +180,7 @@ const sendFileData = (peerConnection: Peer, file: File, id: string) => {
       );
     }
   });
-  readSlice(0, fileReader, file);
+  readSlice(0, buffer, peerConnection);
 };
 
 const sendText = (deviceID: string) => {
