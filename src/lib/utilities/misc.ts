@@ -202,6 +202,7 @@ const checkShare = async () => {
   if (!keys.length) {
     return;
   }
+  caches.delete("trigger");
   caches.open("add").then((cache) => {
     cache.keys().then((requests) => {
       requests.forEach(async (request) => {
@@ -211,9 +212,13 @@ const checkShare = async () => {
           cache.delete(request);
         } else {
           let blob = await response.blob();
-          let file = new File([blob], request.url.slice(26), {
-            type: response.headers.get("content-type"),
-          });
+          let file = new File(
+            [blob],
+            decodeURIComponent(request.url.replace(/https:\/\/*\//, "")),
+            {
+              type: response.headers.get("content-type"),
+            }
+          );
           let $selectedFiles = get(selectedFiles);
           $selectedFiles.push(file);
           selectedFiles.set($selectedFiles);
