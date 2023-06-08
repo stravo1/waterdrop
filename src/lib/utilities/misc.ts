@@ -214,7 +214,7 @@ const checkShare = async () => {
           let blob = await response.blob();
           let file = new File(
             [blob],
-            decodeURIComponent(request.url.replace(/https:\/\/*\//, "")),
+            decodeURIComponent(request.url.replace(/https:\/\/.*\//, "")),
             {
               type: response.headers.get("content-type"),
             }
