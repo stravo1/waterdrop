@@ -45,11 +45,9 @@
   };
 </script>
 
-<div
-  class="flex w-screen flex-col items-center justify-center"
->
+<div class="flex w-screen flex-col items-center justify-center lg:h-fit">
   <div
-    class="icon mb-6 flex w-full justify-start gap-4 pl-3 pt-4 lg:cursor-pointer lg:pr-8 lg:pt-6"
+    class="icon mb-6 flex w-full justify-start gap-4 pl-3 pt-4 lg:cursor-pointer lg:pl-8 lg:pt-6"
   >
     <span
       on:click={goBack}
@@ -85,7 +83,7 @@
         >
       </div>
     </div>
-    <div class="w-full p-6">
+    <div class="my-6 mb-12 w-full overflow-scroll rounded-lg p-6">
       {#if $historyPageSection == "sent"}
         {#if [...$sendingList.keys()].length}
           {#each [...$currentlySending.values(), ...$sendingQueue.values()] as progressInfo}
@@ -128,8 +126,8 @@
   <div
     on:click={clear}
     on:keypress={clear}
-    class="clear-all absolute bottom-0 mb-[10%] flex h-12 w-12 items-center justify-center rounded-full bg-rose-600 lg:cursor-pointer"
+    class="clear-all absolute bottom-0 mb-[10%] flex h-12 w-12 items-center justify-center rounded-full bg-rose-600 right-8 lg:right-20 lg:mb-[5%] lg:cursor-pointer"
   >
-    <span class="material-symbols-rounded text-rose-100"> delete </span>
+    <span class="material-symbols-rounded text-rose-100"> clear_all </span>
   </div>
 </div>

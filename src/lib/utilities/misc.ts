@@ -174,7 +174,6 @@ const sendNextInQueue = () => {
     transferDeQueueingActive.set(false);
     return;
   }
-  showToast("Sending next");
   sendFileData(peer, file, id);
 };
 

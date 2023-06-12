@@ -13,7 +13,12 @@
   export let id: string = "";
 
   const getTime = (time: number) => {
-    if (time == -1) return "Not started yet";
+    if (time == -1) {
+      if (progressSize > 0) {
+        return "Calculating remaining time";
+      }
+      return "Not started yet";
+    }
     const hours = Math.floor(time / 3600);
     time = time - hours * 3600;
     const minutes = Math.floor(time / 60);
@@ -22,7 +27,7 @@
     hours ? (result += `${hours} hours `) : (result += "");
     minutes ? (result += `${minutes} minutes `) : (result += "");
     seconds ? (result += `${seconds} seconds`) : (result += "");
-    return result;
+    return result + " left";
   };
   const getIcon = (arg: string) => {
     switch (arg) {
@@ -105,7 +110,7 @@
       {:else if progressSize >= size}
         Sent to {getDeviceInfo(deviceID)}
       {:else}
-        {getTime(esimatedEnd)} left - {bytesToSize(progressSize)} / {bytesToSize(
+        {getTime(esimatedEnd)} - {bytesToSize(progressSize)} / {bytesToSize(
           size
         )}
       {/if}
