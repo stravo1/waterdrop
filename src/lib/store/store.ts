@@ -33,9 +33,15 @@ interface receivedTextModalContent {
 }
 
 export const noOfToasts = writable<number>(0);
+
 export const modalMessage = writable<string>("Loading");
 export const modalVisible = writable<boolean>(true);
+
 export const sheetVisible = writable<boolean>(false);
+
+export const sameDeviceAlreadyInRoomErrorModalVisible =
+  writable<boolean>(false);
+
 export const receivedTextModalVisible = writable<boolean>(false);
 export const receivedTextModalContent = writable<receivedTextModalContent>({
   name: "",
@@ -43,6 +49,7 @@ export const receivedTextModalContent = writable<receivedTextModalContent>({
 });
 
 export const settingsPageOpen = writable<boolean>(false);
+
 export const historyPageOpen = writable<boolean>(false);
 export const historyPageSection = writable<"sent" | "received">("sent");
 
@@ -50,6 +57,7 @@ export const selectedFiles = writable<File[]>([]);
 export const textInput = writable<string>();
 
 export const connected = writable<boolean>(false);
+export const workingURL = writable<string>();
 export const myID = writable<string>();
 export const deviceInfo = writable<deviceInfo>();
 

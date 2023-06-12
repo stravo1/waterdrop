@@ -2,10 +2,13 @@ import { io } from "socket.io-client";
 import {
   connected,
   connectedPeers,
+  deviceInfo,
   modalMessage,
   modalVisible,
   myID,
   otherDevicesInRoom,
+  sameDeviceAlreadyInRoomErrorModalVisible,
+  workingURL,
 } from "../store/store";
 import { get } from "svelte/store";
 import { createAnsweringPeer, createOfferingPeer } from "./peerMaker";
@@ -18,6 +21,8 @@ const MEMBER_LEAVING_ROOM = "remove-room-member";
 const RECEIVE_SIGNALLING_OFFER = "receive-offer";
 const RECEIVE_SIGNALLING_ANSWER = "receive-answer";
 const RECEIVE_ICE_CANDIDATES = "receive-ice";
+
+const SAME_DEVICE_ALREADY_IN_ROOM_ERROR = "same-device";
 
 const addDeviceToList = (deviceID: string) => {
   var $temp = get(otherDevicesInRoom);
@@ -52,9 +57,14 @@ const addICEcandidates = async (
   await Promise.all(promises);
 };
 
-const initializeSocket = (URL: string) => {
+const initializeSocket = (forced: "forced" | null = null) => {
   modalVisible.set(true);
-  const socket = io(URL);
+  let deviceName = get(deviceInfo).name;
+  let URL = get(workingURL);
+
+  const socket = io(URL, {
+    auth: { deviceName: deviceName, forced: forced == "forced" ? true : false },
+  });
 
   socket.on(JOINING_ROOM, (devicesAlreadyInRoom: string[]) => {
     modalMessage.set("Connecting to nearby devices");
@@ -113,6 +123,11 @@ const initializeSocket = (URL: string) => {
     showToast("Reconnecting to server", "warning");
   });
 
+  socket.on("connect_error", (err) => {
+    if (err.message == SAME_DEVICE_ALREADY_IN_ROOM_ERROR) {
+      sameDeviceAlreadyInRoomErrorModalVisible.set(true);
+    }
+  });
   return socket;
 };
 

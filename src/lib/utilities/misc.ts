@@ -15,6 +15,7 @@ import {
   transferQueueFile,
   transferQueueID,
   transferQueuePeer,
+  workingURL,
 } from "../store/store";
 import Notification from "../components/Notification.svelte";
 import { get } from "svelte/store";
@@ -51,31 +52,33 @@ const getWorkingURL = async () => {
     // no URL was saved
     localStorage.setItem("url", "https://waterdrop-server.glitch.me");
     URL = "https://waterdrop-server.glitch.me";
-    return URL;
+    workingURL.set(URL);
   }
   modalMessage.set("Connecting to server");
 
   try {
     // test if local server is functional
     await fetchWithTimeout(URL);
-    return URL;
+    workingURL.set(URL);
   } catch (error) {
     showToast("Local server unavailable!", "warning");
     modalMessage.set("Trying public servers");
     try {
       // probe glitch server
       await fetch("https://waterdrop-server.glitch.me");
-      return "https://waterdrop-server.glitch.me";
+      workingURL.set("https://waterdrop-server.glitch.me");
     } catch (error) {
       // last option
-      return "https://waterdrop-sqxs.onrender.com";
+      workingURL.set("https://waterdrop-sqxs.onrender.com");
     }
   }
 };
 
 const setDeviceInfo = () => {
   let info = new UAParser(navigator.userAgent);
-  let deviceName = info.getBrowser()["name"];
+  let deviceName = localStorage.getItem("name")
+    ? localStorage.getItem("name")
+    : info.getBrowser()["name"];
   let platform = info.getOS()["name"];
   let type = info.getDevice()["type"] ? info.getDevice()["type"] : "desktop";
 

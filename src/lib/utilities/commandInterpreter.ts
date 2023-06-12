@@ -23,7 +23,7 @@ const commandInterreter = (data: string, deviceID: string) => {
       var $deviceList = get(connectedDevices);
       $deviceList.set(deviceID, action);
       connectedDevices.set($deviceList);
-      let name = action.name + " " + action.deviceType;
+      let name = action.name + " - " + action.deviceType;
       var $number = get(noOfToasts);
       if ($number) {
         noOfToasts.update((n) => n + 1);

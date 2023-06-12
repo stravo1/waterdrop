@@ -15,11 +15,12 @@
   import Home from "./lib/components/Home.svelte";
   import History from "./lib/components/History.svelte";
   import ReceivedTextModal from "./lib/components/ReceivedTextModal.svelte";
+  import SameDeviceAlreadyInRoomErrorModal from "./lib/components/SameDeviceAlreadyInRoomErrorModal.svelte";
 
   onMount(async () => {
-    let URL = await getWorkingURL();
-    initializeSocket(URL);
+    await getWorkingURL();
     setDeviceInfo();
+    initializeSocket();
     await checkShare();
   });
 </script>
@@ -36,3 +37,4 @@
 <SvelteToast />
 <LoadingModal />
 <ReceivedTextModal />
+<SameDeviceAlreadyInRoomErrorModal />
