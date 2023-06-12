@@ -11,6 +11,10 @@ import {
   sendingList,
   sheetVisible,
   textInput,
+  transferDeQueueingActive,
+  transferQueueFile,
+  transferQueueID,
+  transferQueuePeer,
 } from "../store/store";
 import Notification from "../components/Notification.svelte";
 import { get } from "svelte/store";
@@ -19,7 +23,6 @@ import Emitter from "component-emitter";
 
 const chunkSize = 16384;
 const SENDING_CHANNEL = "send";
-const emitter = new Emitter();
 
 /* --- misc useful functions --- */
 function bytesToSize(bytes: number) {
@@ -109,11 +112,68 @@ const sendFiles = (deviceID: string) => {
   $list.forEach(async (entry) => {
     let transactionReq = addTransferToSendingList(deviceID, entry);
     let peer = sendTransactionReq(deviceID, transactionReq);
-    sendFileData(peer, entry, transactionReq.id);
+    addToTransferQueue(transactionReq.id, entry, peer);
   });
+  triggerTransfer();
 };
 
 /* --- helper functions for the sendFiles function --- */
+
+const addToTransferQueue = (id: string, file: File, peer: Peer) => {
+  let $transferQueueID = get(transferQueueID);
+  let $transferQueueFile = get(transferQueueFile);
+  let $transferQueuePeer = get(transferQueuePeer);
+
+  $transferQueueID.push(id);
+  $transferQueueFile.set(id, file);
+  $transferQueuePeer.set(id, peer);
+
+  transferQueueID.set($transferQueueID);
+  transferQueueFile.set($transferQueueFile);
+  transferQueuePeer.set($transferQueuePeer);
+};
+
+const removeFromTransferQueue = () => {
+  let $transferQueueID = get(transferQueueID);
+  let $transferQueueFile = get(transferQueueFile);
+  let $transferQueuePeer = get(transferQueuePeer);
+
+  let id = $transferQueueID.shift();
+
+  if (id == undefined) {
+    return { id: null, file: null, peer: null };
+  }
+
+  let file = $transferQueueFile.get(id);
+  $transferQueueFile.delete(id);
+
+  let peer = $transferQueuePeer.get(id);
+  $transferQueuePeer.delete(id);
+
+  transferQueueID.set($transferQueueID);
+  transferQueueFile.set($transferQueueFile);
+  transferQueuePeer.set($transferQueuePeer);
+
+  return { id: id, file: file, peer: peer };
+};
+
+const triggerTransfer = () => {
+  if (get(transferDeQueueingActive)) {
+    return;
+  }
+  transferDeQueueingActive.set(true);
+  sendNextInQueue();
+};
+
+const sendNextInQueue = () => {
+  let { id, file, peer } = removeFromTransferQueue();
+  if (id == null) {
+    transferDeQueueingActive.set(false);
+    return;
+  }
+  showToast("Sending next");
+  sendFileData(peer, file, id);
+};
 
 const addTransferToSendingList = (deviceID: string, entry: File) => {
   let id = get(myID) + Math.round(new Date().getTime() * Math.random());
@@ -148,7 +208,12 @@ const sendTransactionReq = (deviceID: string, transactionReq: any) => {
   return $reqPeer;
 };
 
-const readSlice = (offset: number, buffer: ArrayBuffer, peer: Peer) => {
+const readSlice = (
+  offset: number,
+  buffer: ArrayBuffer,
+  peer: Peer,
+  emitter
+) => {
   const chunk = buffer.slice(offset, offset + chunkSize);
   const dataChannel = peer.getDataChannel(SENDING_CHANNEL);
   if (dataChannel.bufferedAmount > dataChannel.bufferedAmountLowThreshold) {
@@ -164,6 +229,7 @@ const readSlice = (offset: number, buffer: ArrayBuffer, peer: Peer) => {
 const sendFileData = async (peerConnection: Peer, file: File, id: string) => {
   let offset = 0;
   var buffer = await file.arrayBuffer();
+  let emitter = new Emitter();
   emitter.on("load", (e) => {
     peerConnection.send(
       JSON.stringify({ command: "next-transfer", action: id }),
@@ -172,15 +238,16 @@ const sendFileData = async (peerConnection: Peer, file: File, id: string) => {
     peerConnection.send(e.chunk, SENDING_CHANNEL);
     offset += e.chunk.byteLength;
     if (offset < file.size) {
-      readSlice(offset, buffer, peerConnection);
+      readSlice(offset, buffer, peerConnection, emitter);
     } else {
       peerConnection.send(
         JSON.stringify({ command: "sending-complete", action: id }),
         SENDING_CHANNEL
       );
+      sendNextInQueue();
     }
   });
-  readSlice(0, buffer, peerConnection);
+  readSlice(0, buffer, peerConnection, emitter);
 };
 
 const sendText = (deviceID: string) => {

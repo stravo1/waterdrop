@@ -68,6 +68,13 @@ export const receivingFileBufferList = writable<
 
 export const currentTransferId = writable<string>();
 
+/* --- for maintaining a linear async transfer queue --- */
+export const transferQueueID = writable<string[]>([]);
+export const transferQueueFile = writable<Map<id, File>>(new Map());
+export const transferQueuePeer = writable<Map<id, Peer>>(new Map());
+export const transferDeQueueingActive = writable<boolean>(false);
+
+/* --- derived readale store items for displaying progress in History page --- */
 export const currentlySending = derived(sendingList, ($enrty) => {
   var newMap: Map<id, sendingProgressInfo> = new Map();
   $enrty.forEach((sendingInfo, id) => {
