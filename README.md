@@ -19,6 +19,7 @@ transfer texts, links and files across devices **in the same network.** you just
 - tailwind css: styling framework
 - vite: the build tool
 - socket.io: WebRTC signalling server implementation
+- [peer-lite](https://github.com/skyllo/peer-lite): easy to use lightweight WebRTC browser library
 
 > [waterdrop-server](https://www.github.com/stravo1/waterdrop-server) is the NodeJS server component for this web app. although the transfers occur in a P2P manner but the initial connection and discovery of devices (on the same network) requires a server
 >
